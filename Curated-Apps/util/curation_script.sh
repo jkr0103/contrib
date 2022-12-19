@@ -170,7 +170,10 @@ touch $entrypoint_script
 # Copying the complete binary string to the entrypoint script file
 echo '#!/bin/bash' >> $entrypoint_script
 echo '' >> $entrypoint_script
-echo 'if [[ "$@" = "" ]]; then
+
+# TODO: This is a workaround, actual fix will go in GSC with PR #113
+# This workaround should be removed when contrib starts using GSC v1.4 with PR #113 merged
+echo 'if [[ "$#" -le "1" && "$1" -eq "" ]]; then
     '$complete_binary_cmd'
 else
     '$complete_binary_cmd ' "${@}"
