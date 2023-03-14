@@ -28,7 +28,7 @@ Execute the below commands on the VM.
       /bin/bash workloads/pytorch/base_image_helper/helper.sh
       ```
       The above `helper.sh` script encrypts sensitive files such as models, data etc. with an auto
-      generated test encryption key `workloads/pytorch/base_image_helper/encryption_key` and copies
+      generated test encryption key `workloads/pytorch/encryption_key` and copies
       to the base image. Learn more about [Encrypted files](https://gramine.readthedocs.io/en/stable/manifest-syntax.html#encrypted-files) support in Gramine.
 
    3. Generate the test confidential compute image based on the `pytorch-encrypted` image as shown

@@ -17,11 +17,11 @@ cd examples/pytorch
 python3 download-pretrained-model.py
 cd ../../
 
-dd if=/dev/urandom bs=16 count=1 > encryption_key
+dd if=/dev/urandom bs=16 count=1 > ../encryption_key
 
-gramine-sgx-pf-crypt encrypt -w encryption_key -i examples/pytorch/input.jpg -o input.jpg
-gramine-sgx-pf-crypt encrypt -w encryption_key -i examples/pytorch/classes.txt -o classes.txt
-gramine-sgx-pf-crypt encrypt -w encryption_key -i examples/pytorch/alexnet-pretrained.pt -o \
+gramine-sgx-pf-crypt encrypt -w ../encryption_key -i examples/pytorch/input.jpg -o input.jpg
+gramine-sgx-pf-crypt encrypt -w ../encryption_key -i examples/pytorch/classes.txt -o classes.txt
+gramine-sgx-pf-crypt encrypt -w ../encryption_key -i examples/pytorch/alexnet-pretrained.pt -o \
 alexnet-pretrained.pt
 
 mv examples/pytorch/pytorchexample.py ./
