@@ -87,12 +87,9 @@ below:
     .
     |-- mysql-gsc.dockerfile.template     # Template used by `curation_script.sh` to create a
     |                                       wrapper dockerfile `mysql-gsc.dockerfile` that
-    |                                       includes user-provided inputs such as `ca.cert`
-    |                                       file and command-line arguments into the graminized
-    |                                       MySQL image.
+    |                                       includes user-provided inputs e.g. `ca.cert` file etc.
+    |                                       into the graminized MySQL image.
     |-- mysql.manifest.template           # Template used by `curation_script.sh` to create a
     |                                       user manifest file (with basic set of values defined
     |                                       for graminizing MySQL images), that will be passed to
     |                                       GSC.
-    |-- encryption_helper/                # `encryption_helper` directory contains artifacts which
-    |                                       helps in encrypting the MySQL database.
