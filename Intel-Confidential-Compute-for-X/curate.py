@@ -255,15 +255,6 @@ def get_attestation_input(user_console, guide_win):
             continue
         return attestation_input
 
-def is_azure_instance():
-    service_cmd = "systemctl --type=service --state=running"
-    service_output = subprocess.run(service_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                    universal_newlines=True, shell=True)
-    re_pattern='wa.*?agent.service.*?Azure.*'
-    rec_pattern = re.compile(re_pattern, re.VERBOSE)
-
-    return len(rec_pattern.findall(service_output.stdout)) > 0
-
 def get_docker_run_flags(workload_type):
     flags_file = f'workloads/{workload_type}/docker_run_flags.txt'
 
@@ -390,9 +381,6 @@ def create_custom_image(stdscr, docker_socket, workload_type, base_image_name, i
     update_user_and_commentary_win_array(user_console, guide_win, introduction, index)
     update_user_input()
 
-    if not is_azure_instance():
-        update_user_and_commentary_win_array(user_console, guide_win, azure_warning, azure_help)
-        update_user_input()
 
     # 1. Provide command-line arguments
     update_user_and_commentary_win_array(user_console, guide_win, arg_input, arg_help)
