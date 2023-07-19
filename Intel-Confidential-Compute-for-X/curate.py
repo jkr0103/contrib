@@ -282,7 +282,7 @@ def get_insecure_args(workload_type):
     return get_file_contents(f'workloads/{workload_type}/insecure_args.txt')
 
 def get_image_distro(docker_socket, image_name):
-    output = docker_socket.containers.run(image_name, 'cat /etc/os-release', remove=True)
+    output = docker_socket.containers.run(image_name, entrypoint='cat /usr/lib/os-release', remove=True)
     output = output.decode('UTF-8')
 
     pattern_id = re.compile('^ID=(.*)', flags=re.MULTILINE)
@@ -376,7 +376,6 @@ def create_custom_image(stdscr, docker_socket, workload_type, base_image_name, i
 
     update_user_and_commentary_win_array(user_console, guide_win, introduction, index)
     update_user_input()
-
 
     # 1. Provide command-line arguments
     args = get_insecure_args(workload_type)

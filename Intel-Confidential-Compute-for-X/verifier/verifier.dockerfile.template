@@ -14,18 +14,18 @@ COPY keys/* /usr/share/keyrings/
 RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-sgx-deb.asc] https://download.01.org/intel-sgx/sgx_repo/ubuntu jammy main" \
     | tee /etc/apt/sources.list.d/intel-sgx.list
 
-RUN echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/gramine-keyring.gpg] https://packages.gramineproject.io/ 1.4 main' \
+RUN echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/gramine-keyring.gpg] https://packages.gramineproject.io/ jammy main' \
     | tee /etc/apt/sources.list.d/gramine.list
 
 RUN env DEBIAN_FRONTEND=noninteractive apt-get update \
     && env DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libsgx-dcap-default-qpl=1.16.100.2-jammy1 \
-    gramine
+    gramine=1.5
 
 RUN sed -i "s|^\(  \"pccs_url\": \"https://\).*\(/sgx/certification.*\)|\1api.trustedservices.intel.com\2|g" \
     /etc/sgx_default_qcnl.conf
 
-RUN git clone --depth 1 --branch v1.4 https://github.com/gramineproject/gramine.git
+RUN git clone --depth 1 --branch v1.5 https://github.com/gramineproject/gramine.git
 
 ARG server_dcap_type="secret_prov_minimal"
 RUN if [ $server_dcap_type="secret_prov_pf" ]; then \
