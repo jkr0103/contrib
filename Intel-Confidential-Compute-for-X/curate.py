@@ -474,9 +474,7 @@ def create_custom_image(stdscr, docker_socket, workload_type, base_image_name, i
     commands_fp = open(commands_file, 'w')
 
     if attestation_required == 'y':
-        verifier_env_vars = ' -e RA_TLS_ALLOW_SW_HARDENING_NEEDED=1 '
-        if attestation_input == 'test':
-            verifier_env_vars += ' -e RA_TLS_ALLOW_OUTDATED_TCB_INSECURE=1 '
+        verifier_env_vars = ' -e RA_TLS_MAA_PROVIDER_URL="https://sharedcus.cus.attest.azure.net" '
         if buidtype != 'release':
             verifier_env_vars += ' -e RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE=1 '
 

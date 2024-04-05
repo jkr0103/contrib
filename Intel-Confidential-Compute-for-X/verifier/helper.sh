@@ -42,6 +42,9 @@ if [ "$2" = "y" ]; then
     args="--build-arg server_dcap_type=secret_prov_pf"
 fi
 
+args="--build-arg verifier_type=maa "$args
+echo "args=$args"
+
 # Add encryption key path
 if [ ! -z "$3" ]; then
     echo 'CMD ["'$3'"]' >> verifier.dockerfile
