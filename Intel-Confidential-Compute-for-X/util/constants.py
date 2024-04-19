@@ -67,7 +67,7 @@ signing_key_help = ['SGX requires RSA 3072 keys with public exponent equal to 3.
                     + color_set]
 verifier_build_messg = 'Building the RA-TLS Verifier image, this might take couple of minutes'
 verifier_log_help = 'You may monitor verifier/{} for progress'
-attestation_prompt = ['>> Remote Attestation:' , 'To enable remote attestation using Intel SGX DCAP'
+attestation_prompt = ['>> Remote Attestation:' , 'To enable remote attestation using DCAP'
                       ' libs, use another terminal to copy the ca.crt, server.crt, and'
                       ' server.key certificates to Intel-Confidential-Compute-for-X/verifier/ssl'
                       ' directory',
@@ -81,14 +81,30 @@ attestation_prompt = ['>> Remote Attestation:' , 'To enable remote attestation u
                       'Press CTRL+G when done']
 attestation_help = ['This step enables the enclave to communicate to a remote verifier over'
                     ' an Remote Attestation TLS (RA-TLS) link. This remote verifier uses'
-                    ' Intel SGX DCAP libs to verify the Quote supplied by the enclave. RA-TLS'
+                    ' DCAP libs to verify the Quote supplied by the enclave. RA-TLS'
                     ' attestation flow requires you to provide a set of certificates and keys to'
-                    ' enable the attestation flow. The CA certificate will be used to TLS'
+                    ' enable the attestation flow. The CA certificate will be used to'
                     ' authenticate the verifier during the RA-TLS flow. A test sample set of'
                     ' RA-TLS keys and certs are provided here:',
                     'https://github.com/gramineproject/contrib/tree/master/Examples/aks-attestation/ssl',
                     'For further reading - ',
                     'https://gramine.readthedocs.io/en/stable/attestation.html']
+attestation_type_prompt = ['>> Remote Attestation Type:' , 'Curated-Apps supports ITA (Intel Trust'
+                      ' Authority), MAA (Microsoft Azure Attestation) and Intel SGX DCAP'
+                      ' Remote Attestation types. Please select the desired Remote Attestation type'
+                      '  and make sure all the prerequisites are met before proceeding here.',
+                      '- Type 1 for ITA (Intel Trust Authority), OR',
+                      '- Type 2 for MAA (Microsoft Azure Attestation), OR',
+                      '- No input for Intel SGX DCAP',
+                      'Press CTRL+G when done']
+attestation_type_help = ['This step takes input for selecting the Remote Attestation type.'
+                    ' Please check link below for more details on ITA, MAA and Intel SGX DCAP:',
+                    'ITA - https://docs.trustauthority.intel.com/main/articles/introduction.html',
+                    'MAA - https://azure.microsoft.com/en-in/products/azure-attestation',
+                    'Intel SGX DCAP - https://www.intel.com/content/www/us/en/developer/articles/technical/quote-verification-attestation-with-intel-sgx-dcap.html',
+                    'More details - https://gramine.readthedocs.io/en/stable/attestation.html']
+ita_api_key_prompt = ('Please input Intel Trust Authority API key:'
+                         ',Press CTRL+G when done')
 encrypted_input_example = 'e.g. encrypted files input for {} would be:,{}' + color_set
 encrypted_files_prompt = ['>> Encrypted files and key provisioning:', 'Please provide path of'
                           ' these files relative to the working directory:', '1. Encrypted files'

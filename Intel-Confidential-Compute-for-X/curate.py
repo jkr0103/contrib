@@ -259,6 +259,43 @@ def get_attestation_input(user_console, guide_win):
                 continue
         return attestation_input
 
+def get_attestation_type_input(user_console, guide_win):
+    error = ''
+    while True:
+        user_console.erase()
+        update_user_and_commentary_win_array(user_console, guide_win, attestation_type_prompt,
+                                             attestation_type_help)
+        update_user_error_win(user_console, error)
+        attestation_type_input = update_user_input()
+
+        if attestation_type_input not in ['1', '2', '']:
+            error = 'Invalid option specified'
+            continue
+
+        if attestation_type_input == '1':
+            attestation_type_input = 'ita'
+        elif attestation_type_input == '2':
+            attestation_type_input = 'maa'
+        else:
+            attestation_type_input = 'dcap'
+
+        return attestation_type_input
+
+def get_ita_api_key(user_console, guide_win):
+    error = ''
+    attestation_type_prompt.extend(ita_api_key_prompt.split(','))
+    while True:
+        user_console.erase()
+        update_user_and_commentary_win_array(user_console, guide_win, attestation_type_prompt,
+                                             attestation_type_help)
+        update_user_error_win(user_console, error)
+        key = update_user_input()
+        if key =='':
+            error = 'Please enter non-empty key..'
+            continue
+        return key
+
+
 def get_file_contents(in_file):
     try:
         with open(in_file, 'r') as pfile:
@@ -416,7 +453,7 @@ def create_custom_image(stdscr, docker_socket, workload_type, base_image_name, i
         enc_key_path_in_verifier = enc_key_path.format(encryption_key_name)
         ef_required = 'y'
 
-    # 5. Remote Attestation with RA-TLS
+    # 5.1 Remote Attestation with RA-TLS
     ca_cert_path = ''
     config = ''
     verifier_server = '<verifier-dns-name:port>'
@@ -431,6 +468,12 @@ def create_custom_image(stdscr, docker_socket, workload_type, base_image_name, i
         ca_cert_path, verifier_server = ssl_folder_path_on_host+'/ca.crt', '"localhost:4433"'
         host_net, config = '--net=host', 'test'
         attestation_required = 'y'
+
+    # 5.2. Obtain Attestation type
+    if attestation_required == 'y':
+        attestation_type = get_attestation_type_input(user_console, guide_win)
+        if attestation_type == 'ita':
+            ita_api_key = get_ita_api_key(user_console, guide_win)
 
     # 6. Obtain enclave signing key
     key_path = get_enclave_signing_input(user_console, guide_win)
@@ -452,7 +495,7 @@ def create_custom_image(stdscr, docker_socket, workload_type, base_image_name, i
         verifier_log_file_pointer = open(verifier_log_file, 'w')
         update_user_and_commentary_win_array(user_console, guide_win, [verifier_build_messg],
                                              [verifier_log_help.format(verifier_log_file)])
-        subprocess.call(['./helper.sh', attestation_input, ef_required,
+        subprocess.call(['./helper.sh', attestation_input, attestation_type, ef_required,
                          enc_key_path_in_verifier], stdout=verifier_log_file_pointer,
                          stderr=verifier_log_file_pointer)
         os.chdir('../')
@@ -474,9 +517,19 @@ def create_custom_image(stdscr, docker_socket, workload_type, base_image_name, i
     commands_fp = open(commands_file, 'w')
 
     if attestation_required == 'y':
-        verifier_env_vars = ' -e RA_TLS_ALLOW_SW_HARDENING_NEEDED=1 '
         if attestation_input == 'test':
-            verifier_env_vars += ' -e RA_TLS_ALLOW_OUTDATED_TCB_INSECURE=1 '
+            verifier_env_vars = ' -e RA_TLS_ALLOW_OUTDATED_TCB_INSECURE=1 '
+
+        if attestation_type == 'ita':
+            verifier_env_vars += ' -e RA_TLS_ALLOW_SW_HARDENING_NEEDED=1 ' \
+            ' -e RA_TLS_ITA_PROVIDER_URL="https://api.trustauthority.intel.com" ' \
+            ' -e RA_TLS_ITA_PORTAL_URL="https://portal.trustauthority.intel.com" ' \
+            ' -e RA_TLS_ITA_API_KEY=' + ita_api_key + ' '
+        elif attestation_type == 'maa':
+            verifier_env_vars = ' -e RA_TLS_MAA_PROVIDER_URL="https://sharedcus.cus.attest.azure.net" '
+        else: # attestation_type == 'dcap':
+            verifier_env_vars += ' -e RA_TLS_ALLOW_SW_HARDENING_NEEDED=1 '
+
         if buidtype != 'release':
             verifier_env_vars += ' -e RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE=1 '
 

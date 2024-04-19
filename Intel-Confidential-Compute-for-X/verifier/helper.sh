@@ -10,8 +10,9 @@
 #              'test' means non-production ready certs will be used.
 #              The certs are finally copied to ssl_common directory for future use by GSC image and
 #              the verifier image.
-# -- arg2    : y or n (encrypted files to be used with workload?)
-# -- arg3    : Encryption key path. `CMD ["key-path"]` instruction will be appended to
+# -- arg2    : Attestation_type (ITA, MAA or DCAP)
+# -- arg3    : y or n (encrypted files to be used with workload?)
+# -- arg4    : Encryption key path. `CMD ["key-path"]` instruction will be appended to
 #              verifier.dockerfile when this variable is set.
 
 set -e
@@ -37,14 +38,16 @@ fi
 cp -f verifier.dockerfile.template verifier.dockerfile
 
 args=''
+args="--build-arg verifier_type=$2 "
 # Use `secret_prov_pf` if base image has encrypted files
-if [ "$2" = "y" ]; then
-    args="--build-arg server_dcap_type=secret_prov_pf"
+if [ "$3" = "y" ]; then
+    args="--build-arg server_dcap_type=secret_prov_pf "$args
 fi
+echo "args=$args"
 
 # Add encryption key path
-if [ ! -z "$3" ]; then
-    echo 'CMD ["'$3'"]' >> verifier.dockerfile
+if [ ! -z "$4" ]; then
+    echo 'CMD ["'$4'"]' >> verifier.dockerfile
 fi
 
 cd ..

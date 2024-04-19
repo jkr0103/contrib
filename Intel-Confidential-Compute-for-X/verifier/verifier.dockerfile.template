@@ -7,7 +7,11 @@ RUN env DEBIAN_FRONTEND=noninteractive apt-get update \
     && env DEBIAN_FRONTEND=noninteractive apt-get install -y \
     build-essential \
     git \
-    pkg-config
+    pkg-config \
+    ninja-build \
+    python3 \
+    python3-pip \
+    && /usr/bin/python3 -B -m pip install meson
 
 COPY keys/* /usr/share/keyrings/
 
@@ -25,8 +29,33 @@ RUN env DEBIAN_FRONTEND=noninteractive apt-get update \
 RUN sed -i "s|^\(  \"pccs_url\": \"https://\).*\(/sgx/certification.*\)|\1api.trustedservices.intel.com\2|g" \
     /etc/sgx_default_qcnl.conf
 
+ARG verifier_type="dcap"
+RUN if [ $verifier_type = "ita" ]; then \
+        git clone https://github.com/gramineproject/contrib.git \
+        && cd contrib && git checkout dimakuv/add-intel-trust-authority \
+        && cd Integrations/intel/ra_tls_$verifier_type \
+        && meson setup build --buildtype=release \
+        && ninja -C build \
+        && ninja -C build install; \
+    elif [ $verifier_type = "maa" ]; then \
+        git clone https://github.com/gramineproject/contrib.git \
+        && cd contrib/Integrations/azure/ra_tls_$verifier_type \
+        && meson setup build --buildtype=release \
+        && ninja -C build \
+        && ninja -C build install; \
+    fi
+
 RUN git clone https://github.com/gramineproject/gramine.git \
     && cd gramine && git checkout $(git tag --list 'v*.*' --sort=taggerdate | tail -1)
+
+RUN if [ $verifier_type = "ita" -o $verifier_type = "maa" ]; then \
+    echo '\n\
+.PHONY: '"$verifier_type"'\n\
+'"$verifier_type"': ssl/server.crt secret_prov_minimal/server_'"$verifier_type"' secret_prov/server_'"$verifier_type"' secret_prov_pf/server_'"$verifier_type"' secret_prov_pf/wrap_key secret_prov_pf/enc_files/input.txt\n\n \
+%/server_'"$verifier_type"': %/server.c\n\
+	$(CC) $< $(CFLAGS) $(LDFLAGS) -lsecret_prov_verify_'"$verifier_type"' -pthread -o $@' \
+    >> 'gramine/CI-Examples/ra-tls-secret-prov/Makefile'; \
+    fi
 
 ARG server_dcap_type="secret_prov_minimal"
 RUN if [ $server_dcap_type="secret_prov_pf" ]; then \
@@ -36,11 +65,14 @@ RUN if [ $server_dcap_type="secret_prov_pf" ]; then \
 
 RUN mkdir -p /ra-tls-secret-prov/$server_dcap_type
 RUN cd gramine/CI-Examples/ra-tls-secret-prov/ \
-    && make clean && make dcap \
-    && cp $server_dcap_type/server_dcap /ra-tls-secret-prov/$server_dcap_type/
+    && make clean && make $verifier_type \
+    && cp $server_dcap_type/server_$verifier_type /ra-tls-secret-prov/$server_dcap_type/verifier
 
 RUN rm -rf gramine >/dev/null 2>&1
 
 WORKDIR /ra-tls-secret-prov/$server_dcap_type
 
-ENTRYPOINT ["./server_dcap"]
+RUN /bin/bash ldconfig
+
+ENTRYPOINT ["./verifier"]
+
